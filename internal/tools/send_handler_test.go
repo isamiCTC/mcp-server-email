@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -655,6 +656,7 @@ func TestSendHandler_AttachmentTooLarge(t *testing.T) {
 
 func TestSendHandler_AttachmentNotFound(t *testing.T) {
 	t.Parallel()
+	nonExistentPath := filepath.Join(t.TempDir(), "nonexistent-attachment-file.txt")
 
 	smtpMock := &mockSMTPOps{
 		defaultAccountID: testDefaultAccount,
@@ -668,7 +670,7 @@ func TestSendHandler_AttachmentNotFound(t *testing.T) {
 		"subject": "Subject",
 		"body":    "Body",
 		"attachments": []any{
-			map[string]any{"path": "/tmp/nonexistent-attachment-file.txt"},
+			map[string]any{"path": nonExistentPath},
 		},
 	}))
 	if err != nil {

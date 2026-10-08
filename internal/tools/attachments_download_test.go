@@ -184,8 +184,14 @@ func TestAttachmentGetHandler_SaveToFile(t *testing.T) {
 
 	text := resultText(t, result)
 
-	if !strings.Contains(text, savePath) {
-		t.Error("expected save path in result")
+	var saved struct {
+		Saved string `json:"saved"`
+	}
+	if err := json.Unmarshal([]byte(text), &saved); err != nil {
+		t.Fatalf("failed to parse save result: %v", err)
+	}
+	if saved.Saved != savePath {
+		t.Errorf("saved path = %q, want %q", saved.Saved, savePath)
 	}
 
 	// Verify file was written.
@@ -257,6 +263,8 @@ func TestAttachmentGetHandler_InvalidIndex(t *testing.T) {
 
 func TestAttachmentGetHandler_PathTraversal(t *testing.T) {
 	t.Parallel()
+	traversalPath := filepath.Join(t.TempDir(), "child") + string(filepath.Separator) + ".." +
+		string(filepath.Separator) + "etc" + string(filepath.Separator) + "passwd"
 
 	mock := &mockIMAPOps{
 		defaultAccountID:      "test",
@@ -269,7 +277,7 @@ func TestAttachmentGetHandler_PathTraversal(t *testing.T) {
 	result, err := handler(t.Context(), toolReq(map[string]any{
 		"id":     "test:INBOX:42",
 		"index":  float64(0),
-		"saveTo": "/tmp/../etc/passwd",
+		"saveTo": traversalPath,
 	}))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

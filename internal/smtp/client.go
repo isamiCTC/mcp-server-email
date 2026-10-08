@@ -293,7 +293,7 @@ func (c *Client) dialAndSend(m *mail.Msg) error {
 		opts = append(opts, mail.WithSMTPAuthCustom(smtpAuth))
 	} else {
 		opts = append(opts,
-			mail.WithSMTPAuth(mail.SMTPAuthPlain),
+			mail.WithSMTPAuth(mail.SMTPAuthAutoDiscover),
 			mail.WithUsername(c.account.Username),
 			mail.WithPassword(c.account.Password),
 		)
